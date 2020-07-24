@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
-from cwdcrypt import decrypt
-from cwdcrypt import encrypt
+from wdcrypt import decrypt
+from wdcrypt import encrypt
 __author__ = "Stef"
 
 def main():
