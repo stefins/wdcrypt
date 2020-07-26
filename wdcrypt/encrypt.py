@@ -55,14 +55,6 @@ def main():
         encrypt_file(fil,key)
         print(Fore.GREEN+f'COMPLETED {fil}'+Style.RESET_ALL)
     print(Fore.GREEN+"\n[ENCRYPTION COMPLETE] [FILES]"+Style.RESET_ALL)
-    ch = input("Do you want to remove the secret.key?(Y)")
-    if ch == 'Y' or ch =='y':
-        os.remove("secret.key")
-    else:
-        sys.exit(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
-    print(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
-
-
 
 if __name__ == "__main__":
     main()

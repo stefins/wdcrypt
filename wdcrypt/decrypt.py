@@ -42,8 +42,13 @@ def main():
         shutil.unpack_archive(i,i[:-4],'zip')
         os.remove(i)
         print(Fore.GREEN+f"[UNZIPPING DONE] {i}"+Style.RESET_ALL)
-    os.remove('secret.key')
     print(Fore.CYAN+"[UNPACKING COMPLETED]"+Style.RESET_ALL)
+    ch = input("Do you want to remove the secret.key?(Y)")
+    if ch == 'Y' or ch =='y':
+        os.remove("secret.key")
+    else:
+        sys.exit(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
+    print(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
 
 if __name__ == '__main__':
     main()
