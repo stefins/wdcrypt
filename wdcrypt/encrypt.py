@@ -27,20 +27,10 @@ def main():
         ch = input("Secret Key Found ! Do you want to remove it?(Y)")
         if ch == 'Y' or ch =='y':
             os.remove("secret.key")
-        elif ch == 'N' or ch =='n':
+        else:
             sys.exit("Aborting!")
     global allf
     allf = list(os.walk('.'))
-    '''
-    print("\n[FILES ARE FOLLOWS]\n")
-    for i in allf[0][2]:
-        print(i)
-    '''
-    '''
-    print("\n[FOLDERS ARE FOLLOWS]\n")
-    for i in allf[0][1]:
-        print(i)
-    '''
     global folders
     folders = allf[0][1]
     print("[ZIPPING ALL THE FOLDERS]")
@@ -65,12 +55,11 @@ def main():
         encrypt_file(fil,key)
         print(Fore.GREEN+f'COMPLETED {fil}'+Style.RESET_ALL)
     print(Fore.GREEN+"\n[ENCRYPTION COMPLETE] [FILES]"+Style.RESET_ALL)
-    input()
-    '''
-    for fil in files:
-        print(Fore.RED+f'[REMOVING]{fil}'+Style.RESET_ALL)
-        os.remove(fil)
-    '''
+    ch = input("Do you want to remove the secret.key?(Y)")
+    if ch == 'Y' or ch =='y':
+        os.remove("secret.key")
+    else:
+        sys.exit(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
     print(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
 
 
