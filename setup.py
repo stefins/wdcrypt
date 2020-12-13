@@ -15,7 +15,7 @@ URL = 'https://github.com/IamStefin/wdcrypt'
 EMAIL = 'sstefin@bk.ru'
 AUTHOR = 'Stef'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '1.6'
+VERSION = '1.7'
 
 REQUIRED = [
     'cryptography','colorama'
