@@ -17,8 +17,10 @@ def decrypt_file(file_name):
             with open(file_name,"rb") as fil:
                 encrypted_data = fil.read()
             decrypted_data = f.decrypt(encrypted_data)
-            with open(file_name,"wb") as fil:
+            decrypted_file_name = f.decrypt(bytes(file_name,'utf-8'))
+            with open(decrypted_file_name,"wb") as fil:
                 fil.write(decrypted_data)
+            os.remove(file_name)
         except:
             print(f'[IGNORING]{file_name}')
     else:
