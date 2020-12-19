@@ -9,10 +9,10 @@ import sys
 
 def decrypt_file(file_name):
     print(f"[DECRYPTING FILE] {file_name}")
-    with open("secret.key","rb") as k:
+    with open(".secret.key","rb") as k:
         key = k.read()
     f = Fernet(key)
-    if not(file_name=='secret.key'):
+    if not(file_name=='.secret.key'):
         try:
             with open(file_name,"rb") as fil:
                 encrypted_data = fil.read()
@@ -27,7 +27,7 @@ def decrypt_file(file_name):
         print(f'[IGNORING]{file_name}')
 
 def main():
-    if os.path.exists('secret.key'):
+    if os.path.exists('.secret.key'):
         print(Fore.RED+'[FOUND A SECRET KEY]'+Style.RESET_ALL)
     else:
         sys.exit("SECRET KEY NOT FOUND! ABORTING")
@@ -45,9 +45,9 @@ def main():
         os.remove(i)
         print(Fore.GREEN+f"[UNZIPPING DONE] {i}"+Style.RESET_ALL)
     print(Fore.CYAN+"[UNPACKING COMPLETED]"+Style.RESET_ALL)
-    ch = input("Do you want to remove the secret.key?(Y)")
+    ch = input("Do you want to remove the .secret.key?(Y)")
     if ch == 'Y' or ch =='y':
-        os.remove("secret.key")
+        os.remove(".secret.key")
     else:
         sys.exit(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
     print(Fore.CYAN+f'[ALL DONE !!!]'+Style.RESET_ALL)
