@@ -1,0 +1,19 @@
+[package]
+name = "wdcrypt"
+version = "0.0.1"
+authors = ["Stefin <stefin@pm.me>"]
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/stefins/wdcrypt-rs"
+description = "CLI to encrypt the current working directory with Fernet encryption"
+exclude = [
+    ".github/"
+]
+
+[dependencies]
+tar = "0.4.38"
+fernet = "0.2.0"
+clap = "4.0.29"
+threadpool = "1.8.1"
+num_cpus = "1.0"

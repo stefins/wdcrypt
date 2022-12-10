@@ -1,32 +1,31 @@
-![Upload Python Package](https://github.com/IamStefin/wdcrypt/workflows/Upload%20Python%20Package/badge.svg)
+# wdcrypt-rs
+[![Rust](https://github.com/stefins/wdcrypt-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/stefins/wdcrypt-rs/actions/workflows/rust.yml)
 
-# wdcrypt
-A Python package to encrypt your working directory with a terminal command. This package will use Fernet. Fernet guarantees that a message encrypted using it cannot be manipulated or read without the key. Fernet is an implementation of symmetric (also known as “secret key”) authenticated cryptography.<br/>
-Find more about Fernet [here.](https://cryptography.io/en/latest/fernet/)<br/><br/>
-Note:IF YOU LOSE THE `secret.key` FILE IT WILL BE IMPOSSIBLE TO GET BACK YOUR FILES.
-# Installation
-```console
-$ pip install wdcrypt
+A Rust CLI to encrypt the current working directory with Fernet encryption.
+Fernet guarantees that a message encrypted using it cannot be manipulated or read without the key. Fernet is an implementation of symmetric (also known as “secret key”) authenticated cryptography.
+<br/>
+Find more about Fernet [here](https://cryptography.io/en/latest/fernet/)
 
----> 100%
+## Installation
+Make sure you have `cargo` in your $PATH
+```bash
+cargo install wdcrypt 
 ```
 
-# Usage
+## Usage
+```
+Stefin stefin@pm.me
+Encrypt your current working directory
 
-```console
-$ wdcrypt
-usage: wdcrypt [-h] [-e] [-d]
+USAGE:
+    wdcrypt [OPTIONS]
 
-Encrypt and decrypt your current working directory
-
-optional arguments:
-  -h, --help     show this help message and exit
-  -e, --encrypt  Encrypt all files and folders
-  -d, --decrypt  Decrypt all files and folders
+OPTIONS:
+    -d, --decrypt    Decrypt the current working directory with key
+    -e, --encrypt    Encrypt the current working directory
+    -h, --help       Print help information
+    -V, --version    Print version information
 ```
 
-# Contributions
-Contributions are always welcome!
-
-# License
-MIT License
+## License 
+MIT
