@@ -6,7 +6,7 @@ on:
       - created
 jobs:
   release-to-cargo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Chekout
         uses: actions/checkout@v2
