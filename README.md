@@ -1,5 +1,6 @@
 # wdcrypt-rs
-[![Rust](https://github.com/stefins/wdcrypt-rs/actions/workflows/rust.yml/badge.svg)](https://github.com/stefins/wdcrypt-rs/actions/workflows/rust.yml)
+[![Rust](https://github.com/stefins/wdcrypt/actions/workflows/rust.yml/badge.svg)](https://github.com/stefins/wdcrypt/actions/workflows/rust.yml)
+[![releaser](https://github.com/stefins/wdcrypt/actions/workflows/release.yml/badge.svg)](https://github.com/stefins/wdcrypt/actions/workflows/release.yml)
 
 A Rust CLI to encrypt the current working directory with Fernet encryption.
 Fernet guarantees that a message encrypted using it cannot be manipulated or read without the key. Fernet is an implementation of symmetric (also known as “secret key”) authenticated cryptography.
@@ -14,17 +15,18 @@ cargo install wdcrypt
 
 ## Usage
 ```
-Stefin stefin@pm.me
 Encrypt your current working directory
 
-USAGE:
-    wdcrypt [OPTIONS]
+Usage: wdcrypt [COMMAND]
 
-OPTIONS:
-    -d, --decrypt    Decrypt the current working directory with key
-    -e, --encrypt    Encrypt the current working directory
-    -h, --help       Print help information
-    -V, --version    Print version information
+Commands:
+  encrypt, -e, --encrypt  Encrypt the current working directory
+  decrypt, -d, --decrypt  Decrypt the current working directory
+  help                    Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help information
+  -V, --version  Print version information
 ```
 
 ## License 
