@@ -1,4 +1,7 @@
-use std::io::{self, BufRead, Write};
+use std::{
+    io::{self, BufRead, Write},
+    path::Path,
+};
 
 /// Wait for user input and return what they typed
 fn read_line() -> Option<String> {
@@ -10,8 +13,16 @@ fn read_line() -> Option<String> {
 
 /// Ask a yes/no question to the user
 pub fn ask_bool(question: &str, default: bool) -> Option<bool> {
-    print!("{} {}: ", question, if default { "[Y/n]" } else { "[y/N]" });
-    let _ = io::stdout().flush();
+    let stdout = io::stdout();
+    let mut stdout = stdout.lock();
+    write!(
+        &mut stdout,
+        "{} {}: ",
+        question,
+        if default { "[Y/n]" } else { "[y/N]" }
+    )
+    .unwrap();
+    stdout.flush().unwrap();
     let input = read_line().unwrap();
 
     match &*input {
@@ -25,11 +36,10 @@ pub fn ask_bool(question: &str, default: bool) -> Option<bool> {
     }
 }
 
-/*
-match ask_bool("Do you want to use the existing key?", false).unwrap(){
-            true => {},
-            false => {
-                process::exit(1);
-            }
-        }
-*/
+// This fn returns true if the file is to be overwritten
+pub fn warn_if_file_exists(name: &str) -> bool {
+    if Path::new(name).exists() {
+        return ask_bool(&format!("File {} already exists! Overwrite?", name), true).unwrap();
+    }
+    true
+}

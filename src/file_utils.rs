@@ -1,5 +1,6 @@
 use crate::encryption;
 use crate::models;
+use crate::utils;
 use std::fs;
 use std::fs::metadata;
 use std::fs::File;
@@ -14,7 +15,7 @@ use threadpool::ThreadPool;
 // This function will create a tar file from a folder
 pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut fname = folder_name.to_string();
-    fname.push_str(".tar.gz");
+    fname.push_str(".tar.wdc");
     let mut tar = tar::Builder::new(File::create(&fname)?);
     println!("Tarring {} to {}", folder_name, &fname);
     tar.append_dir_all(folder_name, folder_name)?;
@@ -24,7 +25,7 @@ pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>
 }
 
 // This function will tar the entire folder in the . directory
-pub fn tar_all_folders() -> Result<(), Box<dyn std::error::Error>> {
+pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
     let paths = fs::read_dir(".")?;
     let (tx, rx) = mpsc::channel();
     for path in paths {
@@ -62,7 +63,10 @@ pub fn encrypt_file(fname: &str, key: &str) -> Result<(), Box<dyn std::error::Er
 pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error::Error>> {
     let in_file = BufReader::new(File::open(fname)?);
     fname = &fname[2..];
-    let decrypted_file_name = encryption::decrypt_from_string(key, fname);
+    let decrypted_file_name = encryption::decrypt_from_string(key, fname)?;
+    if !utils::warn_if_file_exists(&decrypted_file_name) {
+        return Ok(());
+    }
     let out_file = BufWriter::new(File::create(&decrypted_file_name)?);
     println!("Decrypting {}", decrypted_file_name);
     encryption::decrypt_file_to_file_buffered(key, in_file, out_file)?;
@@ -72,19 +76,16 @@ pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error
 }
 
 // This function will encrypt all the files in the current working directory
-pub fn encrypt_all_files() -> Result<(), Box<dyn std::error::Error>> {
+pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::error::Error>> {
     let (tx, rx) = mpsc::channel();
     let pool = ThreadPool::new(num_cpus::get());
-    let key: &'static str = Box::leak(
-        encryption::write_fernet_key_to_file(fernet::Fernet::generate_key()).into_boxed_str(),
-    );
     for path in fs::read_dir(".")? {
         let path = path?;
         let tx = tx.clone();
         let file_name = path.path().display().to_string();
         if file_name != "./.secret.key" {
             pool.execute(move || {
-                let file = models::File::new(&file_name, key);
+                let file = models::File::new(&file_name, fernet_key);
                 file.encrypt().unwrap();
                 tx.send(1).unwrap();
             });
@@ -96,18 +97,19 @@ pub fn encrypt_all_files() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 // This function will decrypt all the files in the current working directory
-pub fn decrypt_all_files() -> Result<(), Error> {
+pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
     let (tx, rx) = mpsc::channel();
     let pool = ThreadPool::new(num_cpus::get());
-    let key: &'static str = Box::leak(encryption::read_fernet_key_from_file().into_boxed_str());
     for path in fs::read_dir(".")? {
         let path = path?;
         let tx = tx.clone();
         let file_name = path.path().display().to_string();
         if file_name != "./.secret.key" {
             pool.execute(move || {
-                let file = models::File::new(&file_name, key);
-                file.decrypt().unwrap();
+                let file = models::File::new(&file_name, fernet_key);
+                if file.decrypt().is_err() {
+                    println!("Cannot decrypt file {}", file_name)
+                }
                 tx.send(1).unwrap();
             });
         }
@@ -115,4 +117,12 @@ pub fn decrypt_all_files() -> Result<(), Error> {
     drop(tx);
     for _ in rx {}
     Ok(())
+}
+
+pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
+    todo!()
+}
+
+pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
+    todo!()
 }

@@ -36,9 +36,12 @@ pub fn encrypt_file_to_file_buffered(
 }
 
 // This function will decrypt a ciphertext  to normal form using Fernet
-pub fn decrypt_from_string(key: &str, ciphertext: &str) -> String {
+pub fn decrypt_from_string(
+    key: &str,
+    ciphertext: &str,
+) -> Result<String, Box<dyn std::error::Error>> {
     let fernet = fernet::Fernet::new(key).unwrap();
-    String::from_utf8(fernet.decrypt(ciphertext).unwrap()).unwrap()
+    Ok(String::from_utf8(fernet.decrypt(ciphertext)?)?)
 }
 
 pub fn decrypt_file_to_file_buffered(
@@ -62,7 +65,7 @@ pub fn decrypt_file_to_file_buffered(
 }
 
 // This function write the Fernet key to .secret.key
-pub fn write_fernet_key_to_file(key: String) -> String {
+pub fn write_fernet_key_to_file(key: String) -> &'static str {
     if Path::new(FERNET_FILE).exists() {
         println!("{} already exists", FERNET_FILE);
         if ask_bool("Do you want to use the existing key?", false).unwrap() {
@@ -72,11 +75,11 @@ pub fn write_fernet_key_to_file(key: String) -> String {
     }
     let mut file = File::create(FERNET_FILE).unwrap();
     file.write_all(key.as_bytes()).unwrap();
-    key
+    Box::leak(key.into_boxed_str())
 }
 
 // This function will read the fernet key from file
-pub fn read_fernet_key_from_file() -> String {
+pub fn read_fernet_key_from_file() -> &'static str {
     if !Path::new(FERNET_FILE).exists() {
         println!("{} doesn't exist", FERNET_FILE);
         process::exit(1);
@@ -84,7 +87,7 @@ pub fn read_fernet_key_from_file() -> String {
     let mut file = File::open(FERNET_FILE).unwrap();
     let mut key = String::new();
     file.read_to_string(&mut key).unwrap();
-    key
+    Box::leak(key.into_boxed_str())
 }
 
 #[cfg(test)]
@@ -104,7 +107,7 @@ mod tests {
         let key = "IVijuDdvEix5PnxKP9_4VioeeZVCtRiLWruh3ynM6og=".to_string();
         let test_cipher_text = encrypt_bytes_to_string(&key, "hello world".as_bytes());
         let dec_cipher_text = decrypt_from_string(&key, &test_cipher_text);
-        assert_eq!(dec_cipher_text, "hello world");
+        assert_eq!(dec_cipher_text.unwrap(), "hello world");
     }
 
     #[test]

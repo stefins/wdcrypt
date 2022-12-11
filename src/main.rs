@@ -7,7 +7,7 @@ use clap::Command;
 
 fn main() {
     let matches = clap::Command::new("wdcrypt")
-        .version("0.1.1")
+        .version("2.0.0")
         .author("Stefin stefin@pm.me")
         .about("Encrypt your current working directory")
         .arg_required_else_help(true)
@@ -26,11 +26,15 @@ fn main() {
         .get_matches();
     match matches.subcommand() {
         Some(("encrypt", _sub_matches)) => {
-            file_utils::tar_all_folders().unwrap();
-            file_utils::encrypt_all_files().unwrap();
+            let encryption_key =
+                encryption::write_fernet_key_to_file(fernet::Fernet::generate_key());
+            file_utils::tar_all_dirs().unwrap();
+            file_utils::encrypt_all_files(encryption_key).unwrap();
         }
         Some(("decrypt", _sub_matches)) => {
-            file_utils::decrypt_all_files().unwrap();
+            let encryption_key = encryption::read_fernet_key_from_file();
+            file_utils::decrypt_all_files(encryption_key).unwrap();
+            file_utils::untar_all_dirs().unwrap()
         }
         _ => {}
     }
