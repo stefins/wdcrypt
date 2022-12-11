@@ -7,7 +7,7 @@ use clap::Command;
 
 fn main() {
     let matches = clap::Command::new("wdcrypt")
-        .version("2.0.0")
+        .version("2.0.1")
         .author("Stefin stefin@pm.me")
         .about("Encrypt your current working directory")
         .arg_required_else_help(true)
