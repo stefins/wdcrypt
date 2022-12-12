@@ -5,7 +5,7 @@ mod utils;
 
 use clap::Command;
 
-fn main() {
+fn main() -> Result<(),Box<dyn std::error::Error>> {
     let matches = clap::Command::new("wdcrypt")
         .version("2.0.1")
         .author("Stefin stefin@pm.me")
@@ -28,14 +28,15 @@ fn main() {
         Some(("encrypt", _sub_matches)) => {
             let encryption_key =
                 encryption::write_fernet_key_to_file(fernet::Fernet::generate_key());
-            file_utils::tar_all_dirs().unwrap();
-            file_utils::encrypt_all_files(encryption_key).unwrap();
+            file_utils::tar_all_dirs()?;
+            file_utils::encrypt_all_files(encryption_key)?;
         }
         Some(("decrypt", _sub_matches)) => {
             let encryption_key = encryption::read_fernet_key_from_file();
-            file_utils::decrypt_all_files(encryption_key).unwrap();
-            file_utils::untar_all_dirs().unwrap()
+            file_utils::decrypt_all_files(encryption_key)?;
+            file_utils::untar_all_dirs()?;
         }
         _ => {}
     }
+    Ok(())
 }
