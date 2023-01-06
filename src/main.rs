@@ -34,7 +34,6 @@ fn main() -> Result<(),Box<dyn std::error::Error>> {
         Some(("decrypt", _sub_matches)) => {
             let encryption_key = encryption::read_fernet_key_from_file();
             file_utils::decrypt_all_files(encryption_key)?;
-            file_utils::untar_all_dirs()?;
         }
         _ => {}
     }
