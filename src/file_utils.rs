@@ -10,6 +10,8 @@ use std::io::Error;
 use std::str;
 use std::sync::mpsc;
 use std::thread;
+use tar::Archive;
+use std::ffi::OsStr;
 use threadpool::ThreadPool;
 
 // This function will create a tar file from a folder
@@ -120,9 +122,32 @@ pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
 }
 
 pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-    todo!()
+    println!("{}",dir_name);
+    let file = File::open(dir_name)?;
+    let mut archive = Archive::new(file);
+    println!("Untarring {}", dir_name);
+    archive.unpack(".")?;
+    println!("Untarred {}", dir_name);
+    fs::remove_file(dir_name)?;
+    Ok(())
 }
 
 pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
-    todo!()
+    let paths = fs::read_dir(".")?;
+    let (tx, rx) = mpsc::channel();
+    for path in paths {
+        let path = path?;
+        if let Some("wdc") = path.path().extension().and_then(OsStr::to_str){
+            let pth = path.path().display().to_string();
+            let tx = tx.clone();
+            thread::spawn(move || {
+                let folder = models::Folder::new(&pth);
+                folder.untar().unwrap();
+                tx.send(0).unwrap();
+            });
+        }
+    }
+    drop(tx);
+    for _ in rx {}
+    Ok(())
 }

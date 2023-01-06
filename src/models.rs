@@ -33,7 +33,7 @@ impl<'a> Folder<'a> {
     pub fn tar(&self) -> Result<(), Box<dyn std::error::Error>> {
         file_utils::create_tar_gz(self.name)
     }
-    fn untar(&self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn untar(&self) -> Result<(), Box<dyn std::error::Error>> {
         file_utils::untar_dir(self.name)
     }
 }
