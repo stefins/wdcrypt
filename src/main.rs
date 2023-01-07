@@ -1,11 +1,11 @@
-mod encryption;
 mod core;
+mod encryption;
 mod models;
 mod utils;
 
 use clap::Command;
 
-fn main() -> Result<(),Box<dyn std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = clap::Command::new("wdcrypt")
         .version("2.1.1")
         .author("Stefin stefin@pm.me")

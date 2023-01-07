@@ -13,7 +13,10 @@ exclude = [
 
 [dependencies]
 tar = "0.4.38"
-fernet = "0.2.0"
+fernet = {version = "0.2.0", default-features = false, features = ["rustcrypto"]}
 clap = "4.0.32"
 threadpool = "1.8.1"
 num_cpus = "1.15"
+
+[dev-dependencies]
+getrandom = {version =  "0.2", features = ["js"]}
