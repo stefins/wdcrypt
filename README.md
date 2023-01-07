@@ -8,7 +8,7 @@ Fernet guarantees that a message encrypted using it cannot be manipulated or rea
 Find more about Fernet [here](https://cryptography.io/en/latest/fernet/)
 
 ## Demo
-https://user-images.githubusercontent.com/28928206/211104078-f5fbc7c6-a9b6-47de-85ed-26ac9ef74f4b.mp4
+[![Demo](https://user-images.githubusercontent.com/28928206/211104078-f5fbc7c6-a9b6-47de-85ed-26ac9ef74f4b.mp4)](https://user-images.githubusercontent.com/28928206/211104078-f5fbc7c6-a9b6-47de-85ed-26ac9ef74f4b.mp4)
 
 ## Installation
 Make sure you have `cargo` in your $PATH
