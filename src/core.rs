@@ -29,12 +29,13 @@ pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>
 #[cfg(not(target_arch = "wasm32"))]
 // This function will tar the entire folder in the . directory
 pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
-    let paths = fs::read_dir(".")?;
+    let entries = fs::read_dir(".")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()?;
     let (tx, rx) = mpsc::channel();
-    for path in paths {
-        let path = path?;
-        if metadata(path.path())?.is_dir() {
-            let pth = path.path().display().to_string();
+    for path in entries {
+        if metadata(&path)?.is_dir() {
+            let pth = path.display().to_string();
             let tx = tx.clone();
             let folder = models::Folder::new(&pth);
             folder.tar().unwrap();
@@ -81,10 +82,12 @@ pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error
 pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::error::Error>> {
     let (tx, rx) = mpsc::channel();
     let pool = ThreadPool::new(num_cpus::get());
-    for path in fs::read_dir(".")? {
-        let path = path?;
+    let entries = fs::read_dir(".")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()?;
+    for path in entries {
         let tx = tx.clone();
-        let file_name = path.path().display().to_string();
+        let file_name = path.display().to_string();
         if path.metadata()?.is_dir() {
             println!("{} is a directory!", file_name);
             continue;
@@ -107,10 +110,12 @@ pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::er
 pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
     let (tx, rx) = mpsc::channel();
     let pool = ThreadPool::new(num_cpus::get());
-    for path in fs::read_dir(".")? {
-        let path = path?;
+    let entries = fs::read_dir(".")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()?;
+    for path in entries {
         let tx = tx.clone();
-        let file_name = path.path().display().to_string();
+        let file_name = path.display().to_string();
         if path.metadata()?.is_dir() {
             println!("{} is a directory!", file_name);
             continue;
@@ -143,12 +148,13 @@ pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
-    let paths = fs::read_dir(".")?;
+    let entries = fs::read_dir(".")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()?;
     let (tx, rx) = mpsc::channel();
-    for path in paths {
-        let path = path?;
-        if let Some("wdc") = path.path().extension().and_then(OsStr::to_str) {
-            let pth = path.path().display().to_string();
+    for path in entries {
+        if let Some("wdc") = path.extension().and_then(OsStr::to_str) {
+            let pth = path.display().to_string();
             let tx = tx.clone();
             thread::spawn(move || {
                 let folder = models::Folder::new(&pth);
