@@ -1,20 +1,27 @@
 use crate::encryption;
 use crate::models;
 use crate::utils;
-use std::ffi::OsStr;
 use std::fs;
-use std::fs::metadata;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufWriter;
 use std::io::Error;
 use std::str;
+#[cfg(not(target_arch = "wasm32"))]
+use std::ffi::OsStr;
+#[cfg(not(target_arch = "wasm32"))]
+use std::fs::metadata;
+#[cfg(not(target_arch = "wasm32"))]
 use std::sync::mpsc;
+#[cfg(not(target_arch = "wasm32"))]
 use std::thread;
+#[cfg(not(target_arch = "wasm32"))]
 use tar::Archive;
+#[cfg(not(target_arch = "wasm32"))]
 use threadpool::ThreadPool;
 
 // This function will create a tar file from a folder
+#[cfg(not(target_arch = "wasm32"))]
 pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     let mut fname = folder_name.to_string();
     fname.push_str(".tar.wdc");
@@ -26,8 +33,8 @@ pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>
     Ok(())
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 // This function will tar the entire folder in the . directory
+#[cfg(not(target_arch = "wasm32"))]
 pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
     let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
@@ -60,6 +67,7 @@ pub fn encrypt_file(fname: &str, key: &str) -> Result<(), Box<dyn std::error::Er
     fs::remove_file(fname)?;
     Ok(())
 }
+
 
 // This function will decrypt the file using a fernet key
 pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -135,6 +143,7 @@ pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", dir_name);
     let file = File::open(dir_name)?;
@@ -182,7 +191,7 @@ pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(target_arch = "wasm32")]
 pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::error::Error>> {
-    let mut entries = fs::read_dir(".")?
+    let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()?;
     for path in entries {
@@ -201,7 +210,7 @@ pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::er
 
 #[cfg(target_arch = "wasm32")]
 pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
-    let mut entries = fs::read_dir(".")?
+    let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()?;
     for path in entries {

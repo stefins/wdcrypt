@@ -22,10 +22,12 @@ impl Drop for File<'_> {
     fn drop(&mut self) {}
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub struct Folder<'a> {
     name: &'a str,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl<'a> Folder<'a> {
     pub fn new(name: &'a str) -> Self {
         Self { name }
