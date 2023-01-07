@@ -1,5 +1,5 @@
 mod encryption;
-mod file_utils;
+mod core;
 mod models;
 mod utils;
 
@@ -28,13 +28,13 @@ fn main() -> Result<(),Box<dyn std::error::Error>> {
         Some(("encrypt", _sub_matches)) => {
             let encryption_key =
                 encryption::write_fernet_key_to_file(fernet::Fernet::generate_key());
-            file_utils::tar_all_dirs()?;
-            file_utils::encrypt_all_files(encryption_key)?;
+            core::tar_all_dirs()?;
+            core::encrypt_all_files(encryption_key)?;
         }
         Some(("decrypt", _sub_matches)) => {
             let encryption_key = encryption::read_fernet_key_from_file();
-            file_utils::decrypt_all_files(encryption_key)?;
-            file_utils::untar_all_dirs()?;
+            core::decrypt_all_files(encryption_key)?;
+            core::untar_all_dirs()?;
         }
         _ => {}
     }

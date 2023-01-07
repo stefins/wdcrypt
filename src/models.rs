@@ -1,4 +1,4 @@
-use crate::file_utils;
+use crate::core;
 
 pub struct File<'a> {
     name: &'a str,
@@ -10,11 +10,11 @@ impl<'a> File<'a> {
         Self { name, fernet_key }
     }
     pub fn encrypt(&self) -> Result<(), Box<dyn std::error::Error>> {
-        file_utils::encrypt_file(self.name, self.fernet_key)
+        core::encrypt_file(self.name, self.fernet_key)
     }
 
     pub fn decrypt(&self) -> Result<(), Box<dyn std::error::Error>> {
-        file_utils::decrypt_file(self.name, self.fernet_key)
+        core::decrypt_file(self.name, self.fernet_key)
     }
 }
 
@@ -31,9 +31,9 @@ impl<'a> Folder<'a> {
         Self { name }
     }
     pub fn tar(&self) -> Result<(), Box<dyn std::error::Error>> {
-        file_utils::create_tar_gz(self.name)
+        core::create_tar_gz(self.name)
     }
     pub fn untar(&self) -> Result<(), Box<dyn std::error::Error>> {
-        file_utils::untar_dir(self.name)
+        core::untar_dir(self.name)
     }
 }
