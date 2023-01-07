@@ -1,6 +1,7 @@
 use crate::encryption;
 use crate::models;
 use crate::utils;
+use std::ffi::OsStr;
 use std::fs;
 use std::fs::metadata;
 use std::fs::File;
@@ -11,7 +12,6 @@ use std::str;
 use std::sync::mpsc;
 use std::thread;
 use tar::Archive;
-use std::ffi::OsStr;
 use threadpool::ThreadPool;
 
 // This function will create a tar file from a folder
@@ -26,6 +26,7 @@ pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 // This function will tar the entire folder in the . directory
 pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
     let paths = fs::read_dir(".")?;
@@ -35,11 +36,9 @@ pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
         if metadata(path.path())?.is_dir() {
             let pth = path.path().display().to_string();
             let tx = tx.clone();
-            thread::spawn(move || {
-                let folder = models::Folder::new(&pth);
-                folder.tar().unwrap();
-                tx.send(0).unwrap();
-            });
+            let folder = models::Folder::new(&pth);
+            folder.tar().unwrap();
+            tx.send(0).unwrap();
         }
     }
     drop(tx);
@@ -77,6 +76,7 @@ pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 // This function will encrypt all the files in the current working directory
 pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::error::Error>> {
     let (tx, rx) = mpsc::channel();
@@ -85,6 +85,10 @@ pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::er
         let path = path?;
         let tx = tx.clone();
         let file_name = path.path().display().to_string();
+        if path.metadata()?.is_dir() {
+            println!("{} is a directory!", file_name);
+            continue;
+        }
         if file_name != "./.secret.key" {
             pool.execute(move || {
                 let file = models::File::new(&file_name, fernet_key);
@@ -98,6 +102,7 @@ pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::er
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 // This function will decrypt all the files in the current working directory
 pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
     let (tx, rx) = mpsc::channel();
@@ -106,6 +111,10 @@ pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
         let path = path?;
         let tx = tx.clone();
         let file_name = path.path().display().to_string();
+        if path.metadata()?.is_dir() {
+            println!("{} is a directory!", file_name);
+            continue;
+        }
         if file_name != "./.secret.key" {
             pool.execute(move || {
                 let file = models::File::new(&file_name, fernet_key);
@@ -122,7 +131,7 @@ pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
 }
 
 pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
-    println!("{}",dir_name);
+    println!("{}", dir_name);
     let file = File::open(dir_name)?;
     let mut archive = Archive::new(file);
     println!("Untarring {}", dir_name);
@@ -132,12 +141,13 @@ pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
     let paths = fs::read_dir(".")?;
     let (tx, rx) = mpsc::channel();
     for path in paths {
         let path = path?;
-        if let Some("wdc") = path.path().extension().and_then(OsStr::to_str){
+        if let Some("wdc") = path.path().extension().and_then(OsStr::to_str) {
             let pth = path.path().display().to_string();
             let tx = tx.clone();
             thread::spawn(move || {
@@ -149,5 +159,57 @@ pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
     }
     drop(tx);
     for _ in rx {}
+    Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Untarring not supported in wasm32");
+    Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
+    println!("Tarring not supported in wasm32");
+    Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::error::Error>> {
+    let mut entries = fs::read_dir(".")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()?;
+    for path in entries {
+        let file_name = path.display().to_string();
+        if path.metadata()?.is_dir() {
+            println!("{} is a directory!", file_name);
+            continue;
+        }
+        if file_name != "./.secret.key" {
+            let file = models::File::new(&file_name, fernet_key);
+            file.encrypt().unwrap();
+        }
+    }
+    Ok(())
+}
+
+#[cfg(target_arch = "wasm32")]
+pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
+    let mut entries = fs::read_dir(".")?
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()?;
+    for path in entries {
+        let file_name = path.display().to_string();
+        if path.metadata()?.is_dir() {
+            println!("{} is a directory!", file_name);
+            continue;
+        }
+        if file_name != "./.secret.key" {
+            let file = models::File::new(&file_name, fernet_key);
+            if file.decrypt().is_err() {
+                println!("Cannot decrypt file {}", file_name)
+            }
+        }
+    }
     Ok(())
 }

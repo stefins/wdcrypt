@@ -13,11 +13,12 @@ Find more about Fernet [here](https://cryptography.io/en/latest/fernet/)
 ## Installation
 Make sure you have `cargo` in your $PATH
 ```bash
-cargo install wdcrypt 
+$ cargo install wdcrypt 
 ```
 
 ## Usage
 ```
+$ wdcrypt --help
 Encrypt your current working directory
 
 Usage: wdcrypt [COMMAND]
@@ -30,6 +31,14 @@ Commands:
 Options:
   -h, --help     Print help information
   -V, --version  Print version information
+```
+
+## Building for `WASM` and running it in `wasmtime`
+```bash
+$ cargo build --release --target wasm32-wasi
+$ cd target/wasm32-wasi/release
+$ mkdir demo && cd demo
+$ wasmtime run --dir=. ../wdcrypt.wasm -- --help
 ```
 
 ## License 
