@@ -1,6 +1,6 @@
 [package]
 name = "wdcrypt"
-version = "2.1.1"
+version = "2.2.0"
 authors = ["Stefin <stefin@pm.me>"]
 edition = "2021"
 license = "MIT"
