@@ -25,7 +25,7 @@ jobs:
           cargo publish --dry-run
           cargo publish
   release_for_mac_x86:
-    name: MacOS
+    name: MacOS-x86
     runs-on: macos-10.15
     steps:
       - uses: actions/checkout@master
@@ -34,7 +34,7 @@ jobs:
           command: build
           args: --release
       - name: Rename binary
-        run: mv target/release/wdcrypt wdcrypt-macos64
+        run: mv target/release/wdcrypt wdcrypt-macos-x86
       - name: Upload to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,10 +44,35 @@ jobs:
             -sSL \
             -XPOST \
             -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Content-Length: $(stat -f%z wdcrypt-macos64)" \
+            -H "Content-Length: $(stat -f%z wdcrypt-macos-x86)" \
             -H "Content-Type: application/octet-stream" \
-            --upload-file "wdcrypt-macos64" \
-            "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets?name=wdcrypt-macos64"
+            --upload-file "wdcrypt-macos-x86" \
+            "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets?name=wdcrypt-macos-x86"
+  release_for_mac_arm64:
+    name: MacOS-arm64
+    runs-on: macos-11
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install ARM target
+        run: rustup update && rustup target add aarch64-apple-darwin
+      - name: Build ARM
+        run: cargo build --release --target=aarch64-apple-darwin
+      - name: Rename binary
+        run: mv target/aarch64-apple-darwin/release/wdcrypt wdcrypt-macos-arm64
+      - name: Upload to release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl \
+            -f \
+            -sSL \
+            -XPOST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Length: $(stat -f%z wdcrypt-macos-arm64)" \
+            -H "Content-Type: application/octet-stream" \
+            --upload-file "wdcrypt-macos-arm64" \
+            "https://uploads.github.com/repos/$GITHUB_REPOSITORY/releases/$(jq --raw-output '.release.id' $GITHUB_EVENT_PATH)/assets?name=wdcrypt-macos-arm64"   
+
   release_for_linux:
     name: Linux
     runs-on: ubuntu-18.04
