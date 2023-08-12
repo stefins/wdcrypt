@@ -1,20 +1,16 @@
 use crate::encryption;
 use crate::models;
 use crate::utils;
+#[cfg(not(target_arch = "wasm32"))]
+use std::ffi::OsStr;
 use std::fs;
+#[cfg(not(target_arch = "wasm32"))]
+use std::fs::metadata;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufWriter;
 use std::io::Error;
 use std::str;
-#[cfg(not(target_arch = "wasm32"))]
-use std::ffi::OsStr;
-#[cfg(not(target_arch = "wasm32"))]
-use std::fs::metadata;
-#[cfg(not(target_arch = "wasm32"))]
-use std::sync::mpsc;
-#[cfg(not(target_arch = "wasm32"))]
-use std::thread;
 #[cfg(not(target_arch = "wasm32"))]
 use tar::Archive;
 #[cfg(not(target_arch = "wasm32"))]
@@ -36,21 +32,20 @@ pub fn create_tar_gz(folder_name: &str) -> Result<(), Box<dyn std::error::Error>
 // This function will tar the entire folder in the . directory
 #[cfg(not(target_arch = "wasm32"))]
 pub fn tar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
+    let pool = ThreadPool::new(num_cpus::get());
     let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()?;
-    let (tx, rx) = mpsc::channel();
     for path in entries {
         if metadata(&path)?.is_dir() {
-            let pth = path.display().to_string();
-            let tx = tx.clone();
-            let folder = models::Folder::new(&pth);
-            folder.tar().unwrap();
-            tx.send(0).unwrap();
+            pool.execute(move || {
+                let pth = path.display().to_string();
+                let folder = models::Folder::new(&pth);
+                folder.tar().unwrap();
+            });
         }
     }
-    drop(tx);
-    for _ in rx {}
+    pool.join();
     Ok(())
 }
 
@@ -67,7 +62,6 @@ pub fn encrypt_file(fname: &str, key: &str) -> Result<(), Box<dyn std::error::Er
     fs::remove_file(fname)?;
     Ok(())
 }
-
 
 // This function will decrypt the file using a fernet key
 pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error::Error>> {
@@ -88,13 +82,11 @@ pub fn decrypt_file(mut fname: &str, key: &str) -> Result<(), Box<dyn std::error
 #[cfg(not(target_arch = "wasm32"))]
 // This function will encrypt all the files in the current working directory
 pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::error::Error>> {
-    let (tx, rx) = mpsc::channel();
     let pool = ThreadPool::new(num_cpus::get());
     let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()?;
     for path in entries {
-        let tx = tx.clone();
         let file_name = path.display().to_string();
         if path.metadata()?.is_dir() {
             println!("{} is a directory!", file_name);
@@ -104,25 +96,21 @@ pub fn encrypt_all_files(fernet_key: &'static str) -> Result<(), Box<dyn std::er
             pool.execute(move || {
                 let file = models::File::new(&file_name, fernet_key);
                 file.encrypt().unwrap();
-                tx.send(1).unwrap();
             });
         }
     }
-    drop(tx);
-    for _ in rx {}
+    pool.join();
     Ok(())
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 // This function will decrypt all the files in the current working directory
 pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
-    let (tx, rx) = mpsc::channel();
     let pool = ThreadPool::new(num_cpus::get());
     let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()?;
     for path in entries {
-        let tx = tx.clone();
         let file_name = path.display().to_string();
         if path.metadata()?.is_dir() {
             println!("{} is a directory!", file_name);
@@ -134,12 +122,10 @@ pub fn decrypt_all_files(fernet_key: &'static str) -> Result<(), Error> {
                 if file.decrypt().is_err() {
                     println!("Cannot decrypt file {}", file_name)
                 }
-                tx.send(1).unwrap();
             });
         }
     }
-    drop(tx);
-    for _ in rx {}
+    pool.join();
     Ok(())
 }
 
@@ -157,23 +143,20 @@ pub fn untar_dir(dir_name: &str) -> Result<(), Box<dyn std::error::Error>> {
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn untar_all_dirs() -> Result<(), Box<dyn std::error::Error>> {
+    let pool = ThreadPool::new(num_cpus::get());
     let entries = fs::read_dir(".")?
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()?;
-    let (tx, rx) = mpsc::channel();
     for path in entries {
         if let Some("wdc") = path.extension().and_then(OsStr::to_str) {
             let pth = path.display().to_string();
-            let tx = tx.clone();
-            thread::spawn(move || {
+            pool.execute(move || {
                 let folder = models::Folder::new(&pth);
                 folder.untar().unwrap();
-                tx.send(0).unwrap();
             });
         }
     }
-    drop(tx);
-    for _ in rx {}
+    pool.join();
     Ok(())
 }
 

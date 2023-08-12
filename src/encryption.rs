@@ -56,8 +56,8 @@ pub fn decrypt_file_to_file_buffered(
         if n == 0 {
             break;
         }
-        buffer.pop();
-        writer.write_all(&fernet.decrypt(&buffer[0..n - 1])?)?;
+        buffer.pop(); // to remove the new line 
+        writer.write_all(&fernet.decrypt(&buffer)?)?;
         buffer.clear();
     }
     writer.flush()?;
