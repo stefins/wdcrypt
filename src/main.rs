@@ -7,7 +7,7 @@ use clap::Command;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = clap::Command::new("wdcrypt")
-        .version("2.3.1")
+        .version("2.3.2")
         .author("Stefin stefin@pm.me")
         .about("Encrypt your current working directory")
         .arg_required_else_help(true)
