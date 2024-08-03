@@ -14,7 +14,7 @@ exclude = [
 [dependencies]
 tar = "0.4.41"
 fernet = {version = "0.2.2", default-features = false, features = ["rustcrypto"]}
-clap = "4.5.9"
+clap = "4.5.11"
 threadpool = "1.8.1"
 num_cpus = "1.16"
 
