@@ -16,7 +16,7 @@ tar = "0.4.44"
 fernet = {version = "0.2.2", default-features = false, features = ["rustcrypto"]}
 clap = "4.5.31"
 threadpool = "1.8.1"
-num_cpus = "1.16"
+num_cpus = "1.17"
 
 [dev-dependencies]
 getrandom = {version =  "0.2", features = ["js"]}
